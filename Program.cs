@@ -42,7 +42,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddCors(o => o.AddPolicy("AllowAll", p =>
-    p.WithOrigins("http://localhost:3000")
+    p.WithOrigins("http://localhost:3000", "https://webchat-production-6d96.up.railway.app")
      .AllowAnyHeader()
      .AllowAnyMethod()
      .AllowCredentials()));
