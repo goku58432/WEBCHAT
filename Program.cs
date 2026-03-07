@@ -8,9 +8,12 @@ using ChatAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connStr = builder.Configuration.GetConnectionString("Default") 
-           ?? Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULT")
-           ?? Environment.GetEnvironmentVariable("connectionstrings__default");
+var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
+var mysqlPort = Environment.GetEnvironmentVariable("MYSQL_PORT");
+var mysqlDb   = Environment.GetEnvironmentVariable("MYSQL_DB");
+var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
+var mysqlPass = Environment.GetEnvironmentVariable("MYSQL_PASS");
+var connStr   = $"Server={mysqlHost};Port={mysqlPort};Database={mysqlDb};User={mysqlUser};Password={mysqlPass};";
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connStr, ServerVersion.AutoDetect(connStr)));
 
