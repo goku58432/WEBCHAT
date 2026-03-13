@@ -9,6 +9,12 @@ using ChatAPI.Services;
 
 namespace ChatAPI.Controllers
 {
+    public class ArchivoUploadDto
+    {
+        public int ReceptorId { get; set; }
+        public IFormFile Archivo { get; set; } = null!;
+    }
+
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
@@ -23,7 +29,6 @@ namespace ChatAPI.Controllers
 
         private int MyId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        // GET mis contactos
         [HttpGet("contactos")]
         public async Task<IActionResult> GetContactos()
         {
@@ -41,7 +46,6 @@ namespace ChatAPI.Controllers
             return Ok(lista);
         }
 
-        // POST buscar usuario por correo
         [HttpPost("buscar")]
         public async Task<IActionResult> Buscar([FromBody] BuscarUsuarioDto dto)
         {
@@ -65,7 +69,6 @@ namespace ChatAPI.Controllers
             return Ok(usuario);
         }
 
-        // POST agregar contacto
         [HttpPost("contactos")]
         public async Task<IActionResult> AgregarContacto([FromBody] int contactoId)
         {
@@ -83,7 +86,6 @@ namespace ChatAPI.Controllers
             return Ok(new { message = "Contacto agregado" });
         }
 
-        // DELETE eliminar contacto
         [HttpDelete("contactos/{contactoId}")]
         public async Task<IActionResult> EliminarContacto(int contactoId)
         {
@@ -95,7 +97,6 @@ namespace ChatAPI.Controllers
             return Ok(new { message = "Contacto eliminado" });
         }
 
-        // GET historial de mensajes
         [HttpGet("mensajes/{otroId}")]
         public async Task<IActionResult> GetMensajes(int otroId)
         {
@@ -127,16 +128,17 @@ namespace ChatAPI.Controllers
             return Ok(msgs);
         }
 
-        // POST subir archivo/foto y enviar como mensaje
         [HttpPost("mensaje-archivo")]
         [Consumes("multipart/form-data")]
-        [RequestSizeLimit(52_428_800)] // 50 MB
-        public async Task<IActionResult> EnviarArchivo([FromForm] int receptorId, [FromForm] IFormFile archivo)
+        [RequestSizeLimit(52_428_800)]
+        public async Task<IActionResult> EnviarArchivo([FromForm] ArchivoUploadDto dto)
         {
+            var archivo = dto.Archivo;
+            var receptorId = dto.ReceptorId;
+
             if (archivo == null || archivo.Length == 0)
                 return BadRequest(new { message = "No se recibió archivo" });
 
-            // Detectar tipo
             var ext = Path.GetExtension(archivo.FileName).ToLower();
             string tipo;
             if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext)) tipo = "imagen";
@@ -149,7 +151,7 @@ namespace ChatAPI.Controllers
             {
                 EmisorId = MyId,
                 ReceptorId = receptorId,
-                ContenidoCifrado = archivo.FileName, // guardamos el nombre original
+                ContenidoCifrado = archivo.FileName,
                 TipoMensaje = tipo,
                 ArchivoUrl = url,
                 ArchivoNombre = archivo.FileName,
@@ -172,7 +174,6 @@ namespace ChatAPI.Controllers
             });
         }
 
-        // GET conteo no leídos
         [HttpGet("no-leidos")]
         public async Task<IActionResult> GetNoLeidos()
         {
