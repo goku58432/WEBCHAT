@@ -47,10 +47,13 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddCors(o => o.AddPolicy("AllowAll", p =>
-    p.WithOrigins("http://localhost:3000", "https://spectacular-marzipan-10e3ff.netlify.app")
-     .AllowAnyHeader()
-     .AllowAnyMethod()
-     .AllowCredentials()));
+    p.WithOrigins(
+        "http://localhost:3000",
+        "https://spectacular-marzipan-10e3ff.netlify.app"
+    )
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
