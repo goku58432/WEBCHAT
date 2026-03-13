@@ -18,6 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connStr, ServerVersion.AutoDetect(connStr)));
 
 builder.Services.AddSingleton<CryptoService>();
+builder.Services.AddSingleton<CloudinaryService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
