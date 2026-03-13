@@ -30,6 +30,12 @@ namespace ChatAPI.Models
         public int EmisorId { get; set; }
         public int ReceptorId { get; set; }
         public string ContenidoCifrado { get; set; } = "";
+        // "texto" | "imagen" | "video" | "archivo"
+        public string TipoMensaje { get; set; } = "texto";
+        // URL de Cloudinary si es media, null si es texto
+        public string? ArchivoUrl { get; set; }
+        // Nombre original del archivo para descargas
+        public string? ArchivoNombre { get; set; }
         public DateTime FechaEnvio { get; set; } = DateTime.UtcNow;
         public bool Leido { get; set; } = false;
         public Usuario? Emisor { get; set; }

@@ -16,8 +16,10 @@ namespace ChatAPI.Controllers
     {
         private readonly AppDbContext _db;
         private readonly CryptoService _crypto;
-        public UsuariosController(AppDbContext db, CryptoService crypto)
-        { _db = db; _crypto = crypto; }
+        private readonly CloudinaryService _cloudinary;
+
+        public UsuariosController(AppDbContext db, CryptoService crypto, CloudinaryService cloudinary)
+        { _db = db; _crypto = crypto; _cloudinary = cloudinary; }
 
         private int MyId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
@@ -39,7 +41,7 @@ namespace ChatAPI.Controllers
             return Ok(lista);
         }
 
-        // POST buscar usuario por correo para agregar
+        // POST buscar usuario por correo
         [HttpPost("buscar")]
         public async Task<IActionResult> Buscar([FromBody] BuscarUsuarioDto dto)
         {
@@ -93,7 +95,7 @@ namespace ChatAPI.Controllers
             return Ok(new { message = "Contacto eliminado" });
         }
 
-        // GET historial de mensajes con un contacto
+        // GET historial de mensajes
         [HttpGet("mensajes/{otroId}")]
         public async Task<IActionResult> GetMensajes(int otroId)
         {
@@ -108,12 +110,14 @@ namespace ChatAPI.Controllers
                     EmisorId = m.EmisorId,
                     EmisorNombre = m.Emisor!.Nombre,
                     ReceptorId = m.ReceptorId,
-                    Contenido = _crypto.Decrypt(m.ContenidoCifrado),
+                    Contenido = m.TipoMensaje == "texto" ? _crypto.Decrypt(m.ContenidoCifrado) : m.ContenidoCifrado,
+                    TipoMensaje = m.TipoMensaje,
+                    ArchivoUrl = m.ArchivoUrl,
+                    ArchivoNombre = m.ArchivoNombre,
                     FechaEnvio = m.FechaEnvio,
                     Leido = m.Leido
                 }).ToListAsync();
 
-            // Marcar como leídos
             var noLeidos = await _db.Mensajes
                 .Where(m => m.EmisorId == otroId && m.ReceptorId == MyId && !m.Leido)
                 .ToListAsync();
@@ -123,7 +127,51 @@ namespace ChatAPI.Controllers
             return Ok(msgs);
         }
 
-        // GET conteo de no leídos por contacto
+        // POST subir archivo/foto y enviar como mensaje
+        [HttpPost("mensaje-archivo")]
+        [RequestSizeLimit(52_428_800)] // 50 MB
+        public async Task<IActionResult> EnviarArchivo([FromForm] int receptorId, [FromForm] IFormFile archivo)
+        {
+            if (archivo == null || archivo.Length == 0)
+                return BadRequest(new { message = "No se recibió archivo" });
+
+            // Detectar tipo
+            var ext = Path.GetExtension(archivo.FileName).ToLower();
+            string tipo;
+            if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext)) tipo = "imagen";
+            else if (new[] { ".mp4", ".mov", ".avi", ".webm" }.Contains(ext)) tipo = "video";
+            else tipo = "archivo";
+
+            var url = await _cloudinary.SubirArchivoAsync(archivo, tipo);
+
+            var msg = new Mensaje
+            {
+                EmisorId = MyId,
+                ReceptorId = receptorId,
+                ContenidoCifrado = archivo.FileName, // guardamos el nombre original
+                TipoMensaje = tipo,
+                ArchivoUrl = url,
+                ArchivoNombre = archivo.FileName,
+                FechaEnvio = DateTime.UtcNow
+            };
+            _db.Mensajes.Add(msg);
+            await _db.SaveChangesAsync();
+
+            return Ok(new MensajeResponseDto
+            {
+                Id = msg.Id,
+                EmisorId = MyId,
+                ReceptorId = receptorId,
+                Contenido = archivo.FileName,
+                TipoMensaje = tipo,
+                ArchivoUrl = url,
+                ArchivoNombre = archivo.FileName,
+                FechaEnvio = msg.FechaEnvio,
+                Leido = false
+            });
+        }
+
+        // GET conteo no leídos
         [HttpGet("no-leidos")]
         public async Task<IActionResult> GetNoLeidos()
         {
