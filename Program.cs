@@ -54,7 +54,8 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", p =>
     )
     .AllowAnyHeader()
     .AllowAnyMethod()
-    .AllowCredentials()));
+    .AllowCredentials()
+    .SetIsOriginAllowed(_ => true)));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
