@@ -129,6 +129,7 @@ namespace ChatAPI.Controllers
 
         // POST subir archivo/foto y enviar como mensaje
         [HttpPost("mensaje-archivo")]
+        [Consumes("multipart/form-data")]
         [RequestSizeLimit(52_428_800)] // 50 MB
         public async Task<IActionResult> EnviarArchivo([FromForm] int receptorId, [FromForm] IFormFile archivo)
         {
