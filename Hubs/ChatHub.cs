@@ -67,6 +67,13 @@ namespace ChatAPI.Hubs
             await Clients.Caller.SendAsync("MensajeRecibido", response);
             if (_conexiones.TryGetValue(receptorId, out var connId))
                 await Clients.Client(connId).SendAsync("MensajeRecibido", response);
+            
+            public async Task NotificarArchivo(int receptorId, object mensajeDto)
+{
+    var emisorId = int.Parse(Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+    if (_conexiones.TryGetValue(receptorId, out var connId))
+        await Clients.Client(connId).SendAsync("MensajeRecibido", mensajeDto);
+}    
         }
     }
 }
