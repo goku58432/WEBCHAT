@@ -48,6 +48,7 @@ namespace ChatAPI.Hubs
                 EmisorId = emisorId,
                 ReceptorId = receptorId,
                 ContenidoCifrado = _crypto.Encrypt(contenido),
+                TipoMensaje = "texto",
                 FechaEnvio = DateTime.UtcNow
             };
             _db.Mensajes.Add(msg);
@@ -60,6 +61,9 @@ namespace ChatAPI.Hubs
                 emisorNombre = emisor.Nombre,
                 receptorId,
                 contenido,
+                tipoMensaje = "texto",
+                archivoUrl = (string?)null,
+                archivoNombre = (string?)null,
                 fechaEnvio = msg.FechaEnvio,
                 leido = false
             };
@@ -67,13 +71,13 @@ namespace ChatAPI.Hubs
             await Clients.Caller.SendAsync("MensajeRecibido", response);
             if (_conexiones.TryGetValue(receptorId, out var connId))
                 await Clients.Client(connId).SendAsync("MensajeRecibido", response);
-            
-            public async Task NotificarArchivo(int receptorId, object mensajeDto)
-{
-    var emisorId = int.Parse(Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-    if (_conexiones.TryGetValue(receptorId, out var connId))
-        await Clients.Client(connId).SendAsync("MensajeRecibido", mensajeDto);
-}    
+        }
+
+        public async Task NotificarArchivo(int receptorId, object mensajeDto)
+        {
+            var emisorId = int.Parse(Context.User!.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            if (_conexiones.TryGetValue(receptorId, out var connId))
+                await Clients.Client(connId).SendAsync("MensajeRecibido", mensajeDto);
         }
     }
 }
