@@ -11,6 +11,9 @@ namespace ChatAPI.Models
         public bool Activo { get; set; } = true;
         public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
         public DateTime? UltimaConexion { get; set; }
+        // WebAuthn / biométrico web
+        public string? BiometricoCredentialId { get; set; }
+        public string? BiometricoPublicKey { get; set; }
         public ICollection<Contacto> Contactos { get; set; } = new List<Contacto>();
     }
 
@@ -30,11 +33,8 @@ namespace ChatAPI.Models
         public int EmisorId { get; set; }
         public int ReceptorId { get; set; }
         public string ContenidoCifrado { get; set; } = "";
-        // "texto" | "imagen" | "video" | "archivo"
         public string TipoMensaje { get; set; } = "texto";
-        // URL de Cloudinary si es media, null si es texto
         public string? ArchivoUrl { get; set; }
-        // Nombre original del archivo para descargas
         public string? ArchivoNombre { get; set; }
         public DateTime FechaEnvio { get; set; } = DateTime.UtcNow;
         public bool Leido { get; set; } = false;
