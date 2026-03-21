@@ -39,4 +39,24 @@ namespace ChatAPI.DTOs
         public DateTime FechaEnvio { get; set; }
         public bool Leido { get; set; }
     }
+
+    public class WebAuthnChallengeRequestDto
+    {
+        public string Correo { get; set; } = "";
+        public string? RpId { get; set; }
+    }
+
+    public class WebAuthnRegisterDto
+    {
+        public string Correo { get; set; } = "";
+        public string CredentialId { get; set; } = "";
+        public string PublicKey { get; set; } = "";
+    }
+
+    public class WebAuthnLoginDto
+    {
+        public string Correo { get; set; } = "";
+        public string CredentialId { get; set; } = "";
+        public string Signature { get; set; } = "";
+    }
 }
