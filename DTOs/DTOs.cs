@@ -59,4 +59,17 @@ namespace ChatAPI.DTOs
         public string CredentialId { get; set; } = "";
         public string Signature { get; set; } = "";
     }
+
+    public class FacialRegistrarDto
+    {
+        public string Correo { get; set; } = "";
+    
+        public string Embedding { get; set; } = "";
+    }
+
+    public class FacialVerificarDto
+    {
+        public string Correo { get; set; } = "";
+        public string Embedding { get; set; } = "";
+    }
 }
